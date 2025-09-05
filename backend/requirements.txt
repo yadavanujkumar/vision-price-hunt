@@ -1,0 +1,11 @@
+# Core FastAPI and server dependencies
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic-settings
+
+# Basic image processing (will install others later if needed)
+pillow
+requests
+beautifulsoup4
+aiofiles
