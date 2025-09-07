@@ -41,6 +41,7 @@ export function ImageUpload({ onUpload, isUploading = false }: ImageUploadProps)
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault()
+    console.log('File input changed:', e.target.files)
     if (e.target.files && e.target.files[0]) {
       handleFile(e.target.files[0])
     }
@@ -139,15 +140,22 @@ export function ImageUpload({ onUpload, isUploading = false }: ImageUploadProps)
                 type="file"
                 accept="image/*"
                 onChange={handleChange}
-                className="hidden"
                 id="file-upload"
+                style={{ display: 'none' }}
+                tabIndex={-1}
               />
-              <label htmlFor="file-upload">
-                <Button variant="outline" className="cursor-pointer">
-                  <FileImage className="mr-2 h-4 w-4" />
-                  Select Image
-                </Button>
-              </label>
+              <Button
+                type="button"
+                variant="outline"
+                className="cursor-pointer w-full"
+                onClick={() => {
+                  const input = document.getElementById('file-upload') as HTMLInputElement
+                  if (input) input.click()
+                }}
+              >
+                <FileImage className="mr-2 h-4 w-4" />
+                Select Image
+              </Button>
             </div>
           </CardContent>
         </Card>
