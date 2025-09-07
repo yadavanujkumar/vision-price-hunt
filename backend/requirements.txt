@@ -12,3 +12,9 @@ pillow
 requests
 beautifulsoup4
 aiofiles
+
+# Additional scraping dependencies
+lxml
+fake-useragent
+urllib3
+user-agents

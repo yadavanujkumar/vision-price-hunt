@@ -26,6 +26,13 @@ class Settings(BaseSettings):
     max_retries: int = 3
     user_agent: str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
     
+    # Real-time scraping settings
+    enable_real_scraping: bool = True
+    scraping_fallback_to_mock: bool = True
+    max_products_per_source: int = 5
+    scraping_delay_min: float = 1.0
+    scraping_delay_max: float = 3.0
+    
     class Config:
         env_file = ".env"
 
