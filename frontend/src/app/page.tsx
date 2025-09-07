@@ -3,17 +3,37 @@
 import React, { useState } from 'react'
 import { ImageUpload } from '@/components/ImageUpload'
 import { SearchResults, SearchResponse } from '@/components/SearchResults'
+import { ProductAnalysis } from '@/components/ProductAnalysis'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Camera, Search, TrendingUp } from 'lucide-react'
+
+interface ProductInfo {
+  name: string
+  brand?: string
+  category?: string
+  description?: string
+  extracted_text?: string
+  confidence: number
+}
+
+interface UploadResponse {
+  message: string
+  filename: string
+  product_info: ProductInfo
+  query_id: string
+  file_url: string
+}
 
 export default function Home() {
   const [isUploading, setIsUploading] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
+  const [uploadResponse, setUploadResponse] = useState<UploadResponse | null>(null)
   const [searchResults, setSearchResults] = useState<SearchResponse | null>(null)
 
   const handleImageUpload = async (file: File) => {
     setIsUploading(true)
-    setIsSearching(true)
+    setUploadResponse(null)
+    setSearchResults(null)
     
     try {
       // Create FormData for file upload
@@ -31,14 +51,42 @@ export default function Home() {
       }
 
       const uploadData = await uploadResponse.json()
+      setUploadResponse(uploadData)
       
+    } catch (error) {
+      console.error('Error:', error)
+      // Show mock upload response for demo
+      const mockUploadResponse: UploadResponse = {
+        message: "Image uploaded and analyzed successfully",
+        filename: file.name,
+        product_info: {
+          name: "iPhone 15 Pro Max 256GB Space Black",
+          brand: "Apple",
+          category: "Electronics",
+          description: "iPhone 15 Pro Max 256GB Space Black Apple $1199.99",
+          extracted_text: "iPhone 15 Pro Max 256GB Space Black Apple $1199.99",
+          confidence: 0.95
+        },
+        query_id: "demo-query-123",
+        file_url: "/uploads/demo.jpg"
+      }
+      setUploadResponse(mockUploadResponse)
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const handleSearchProducts = async (productInfo: ProductInfo) => {
+    setIsSearching(true)
+    
+    try {
       // Search for products based on extracted info
       const searchResponse = await fetch('http://localhost:8000/api/search', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(uploadData.product_info),
+        body: JSON.stringify(productInfo),
       })
 
       if (!searchResponse.ok) {
@@ -112,7 +160,6 @@ export default function Home() {
       }
       setSearchResults(mockResponse)
     } finally {
-      setIsUploading(false)
       setIsSearching(false)
     }
   }
@@ -188,6 +235,15 @@ export default function Home() {
 
           {/* Upload Section */}
           <ImageUpload onUpload={handleImageUpload} isUploading={isUploading} />
+
+          {/* Product Analysis Section */}
+          {uploadResponse && (
+            <ProductAnalysis 
+              uploadResponse={uploadResponse} 
+              onSearchProducts={handleSearchProducts}
+              isSearching={isSearching}
+            />
+          )}
 
           {/* Results Section */}
           <SearchResults results={searchResults} isLoading={isSearching} />
