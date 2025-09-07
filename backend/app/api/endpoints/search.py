@@ -77,26 +77,43 @@ async def search_products(
             query_id=query_id
         )
 
-@router.get("/search/{query_id}")
-async def get_search_results(query_id: str):
+@router.get("/search/best-deals")
+async def get_best_deals(
+    category: Optional[str] = Query(default=None, description="Product category"),
+    limit: int = Query(default=5, le=20, description="Number of deals to return")
+):
     """
-    Get cached search results by query ID
+    Get current best deals across all categories
     
-    - **query_id**: Query ID from previous search
+    - **category**: Optional category filter
+    - **limit**: Number of deals to return (max 20)
     
-    Note: This is a placeholder - in production you'd implement result caching
+    Note: This is a demo endpoint with mock data
     """
     try:
-        # This is a placeholder implementation
-        # In production, you'd store and retrieve results from a cache/database
+        # Create a generic product info for searching
+        product_info = ProductInfo(
+            name="popular products",
+            category=category,
+            description="Best deals search"
+        )
+        
+        # Get offers from all sources
+        all_offers = await scraping_service.scrape_all_sources(product_info)
+        valid_offers = scraping_service.filter_and_validate_offers(all_offers)
+        
+        # Get best deals
+        best_deals = ranking_service.get_best_deals(valid_offers, limit)
+        
         return {
-            "message": f"Search results for query {query_id}",
-            "note": "Result caching not implemented in this demo"
+            "best_deals": best_deals,
+            "category": category,
+            "total_deals": len(best_deals)
         }
     
     except Exception as e:
-        logger.error(f"Error retrieving search results: {e}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve search results")
+        logger.error(f"Error getting best deals: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get best deals")
 
 @router.get("/search/similar/{product_name}")
 async def search_similar_products(
@@ -155,43 +172,26 @@ async def search_similar_products(
         logger.error(f"Error searching similar products: {e}")
         raise HTTPException(status_code=500, detail="Failed to search similar products")
 
-@router.get("/search/best-deals")
-async def get_best_deals(
-    category: Optional[str] = Query(default=None, description="Product category"),
-    limit: int = Query(default=5, le=20, description="Number of deals to return")
-):
+@router.get("/search/{query_id}")
+async def get_search_results(query_id: str):
     """
-    Get current best deals across all categories
+    Get cached search results by query ID
     
-    - **category**: Optional category filter
-    - **limit**: Number of deals to return (max 20)
+    - **query_id**: Query ID from previous search
     
-    Note: This is a demo endpoint with mock data
+    Note: This is a placeholder - in production you'd implement result caching
     """
     try:
-        # Create a generic product info for searching
-        product_info = ProductInfo(
-            name="popular products",
-            category=category,
-            description="Best deals search"
-        )
-        
-        # Get offers from all sources
-        all_offers = await scraping_service.scrape_all_sources(product_info)
-        valid_offers = scraping_service.filter_and_validate_offers(all_offers)
-        
-        # Get best deals
-        best_deals = ranking_service.get_best_deals(valid_offers, limit)
-        
+        # This is a placeholder implementation
+        # In production, you'd store and retrieve results from a cache/database
         return {
-            "best_deals": best_deals,
-            "category": category,
-            "total_deals": len(best_deals)
+            "message": f"Search results for query {query_id}",
+            "note": "Result caching not implemented in this demo"
         }
     
     except Exception as e:
-        logger.error(f"Error getting best deals: {e}")
-        raise HTTPException(status_code=500, detail="Failed to get best deals")
+        logger.error(f"Error retrieving search results: {e}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve search results")
 
 @router.get("/search/health")
 async def search_health():
