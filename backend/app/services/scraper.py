@@ -46,13 +46,19 @@ class ScrapingService:
     def extract_price_from_text(self, text: str) -> Optional[float]:
         """Extract price from text using regex patterns"""
         try:
-            # Common price patterns
+            # Common price patterns for Indian currency (INR)
             patterns = [
+                r'₹(\d+(?:,\d{2,3})*(?:\.\d{2})?)',  # ₹123.45, ₹1,234.56
+                r'Rs\.\s*(\d+(?:,\d{2,3})*(?:\.\d{2})?)',  # Rs. 123.45
+                r'Rs\s*(\d+(?:,\d{2,3})*(?:\.\d{2})?)',  # Rs 123.45
+                r'(\d+(?:,\d{2,3})*(?:\.\d{2})?)\s*₹',  # 123.45₹
+                r'(\d+(?:,\d{2,3})*(?:\.\d{2})?)\s*INR',  # 123.45 INR
+                r'INR\s*(\d+(?:,\d{2,3})*(?:\.\d{2})?)',  # INR 123.45
+                r'Price:\s*₹?(\d+(?:,\d{2,3})*(?:\.\d{2})?)',  # Price: ₹123.45
+                # Fallback patterns for USD (for legacy support)
                 r'\$(\d+(?:,\d{3})*(?:\.\d{2})?)',  # $123.45, $1,234.56
                 r'(\d+(?:,\d{3})*(?:\.\d{2})?)\s*\$',  # 123.45$
                 r'USD\s*(\d+(?:,\d{3})*(?:\.\d{2})?)',  # USD 123.45
-                r'(\d+(?:,\d{3})*(?:\.\d{2})?)\s*USD',  # 123.45 USD
-                r'Price:\s*\$?(\d+(?:,\d{3})*(?:\.\d{2})?)',  # Price: $123.45
             ]
             
             for pattern in patterns:
@@ -67,27 +73,27 @@ class ScrapingService:
             logger.error(f"Error extracting price: {e}")
             return None
 
-    async def search_amazon(self, query: str) -> List[ProductOffer]:
-        """Search Amazon for products (mock implementation for demo)"""
+    async def search_amazon_india(self, query: str) -> List[ProductOffer]:
+        """Search Amazon India for products (mock implementation for demo)"""
         # Note: This is a simplified mock implementation
         # In production, you'd need to use Amazon's API or proper scraping
         try:
             await self.create_session()
             
-            # Mock data for demo purposes
+            # Mock data for demo purposes with Indian pricing
             mock_offers = [
                 ProductOffer(
                     product_info=ProductInfo(
-                        name=f"Amazon: {query}",
+                        name=f"Amazon India: {query}",
                         brand="Amazon",
                         category="Electronics",
-                        description=f"Product matching {query} from Amazon"
+                        description=f"Product matching {query} from Amazon India"
                     ),
                     price_info=PriceInfo(
-                        price=99.99,
-                        currency="USD",
-                        source="Amazon",
-                        url="https://amazon.com/product/123",
+                        price=7999.00,
+                        currency="INR",
+                        source="Amazon India",
+                        url="https://amazon.in/product/123",
                         availability="in_stock",
                         last_updated=datetime.now()
                     ),
@@ -98,28 +104,28 @@ class ScrapingService:
             return mock_offers
             
         except Exception as e:
-            logger.error(f"Error searching Amazon: {e}")
+            logger.error(f"Error searching Amazon India: {e}")
             return []
 
-    async def search_ebay(self, query: str) -> List[ProductOffer]:
-        """Search eBay for products (mock implementation)"""
+    async def search_flipkart(self, query: str) -> List[ProductOffer]:
+        """Search Flipkart for products (mock implementation)"""
         try:
             await self.create_session()
             
-            # Mock data for demo purposes
+            # Mock data for demo purposes with Indian pricing
             mock_offers = [
                 ProductOffer(
                     product_info=ProductInfo(
-                        name=f"eBay: {query}",
-                        brand="eBay",
+                        name=f"Flipkart: {query}",
+                        brand="Flipkart",
                         category="Electronics",
-                        description=f"Product matching {query} from eBay"
+                        description=f"Product matching {query} from Flipkart"
                     ),
                     price_info=PriceInfo(
-                        price=89.99,
-                        currency="USD",
-                        source="eBay",
-                        url="https://ebay.com/product/456",
+                        price=7299.00,
+                        currency="INR",
+                        source="Flipkart",
+                        url="https://flipkart.com/product/456",
                         availability="in_stock",
                         last_updated=datetime.now()
                     ),
@@ -130,13 +136,13 @@ class ScrapingService:
             return mock_offers
             
         except Exception as e:
-            logger.error(f"Error searching eBay: {e}")
+            logger.error(f"Error searching Flipkart: {e}")
             return []
 
-    async def search_generic_store(self, query: str, store_name: str = "Generic Store") -> List[ProductOffer]:
-        """Search a generic e-commerce store (mock implementation)"""
+    async def search_indian_store(self, query: str, store_name: str = "Indian Store", base_price: float = 6999.00) -> List[ProductOffer]:
+        """Search an Indian e-commerce store (mock implementation)"""
         try:
-            # Mock data for demo purposes
+            # Mock data for demo purposes with Indian pricing
             mock_offers = [
                 ProductOffer(
                     product_info=ProductInfo(
@@ -146,8 +152,8 @@ class ScrapingService:
                         description=f"Product matching {query} from {store_name}"
                     ),
                     price_info=PriceInfo(
-                        price=79.99,
-                        currency="USD",
+                        price=base_price,
+                        currency="INR",
                         source=store_name,
                         url=f"https://{store_name.lower().replace(' ', '')}.com/product/789",
                         availability="in_stock",
@@ -179,13 +185,13 @@ class ScrapingService:
             query = "product"
         
         try:
-            # Search multiple sources concurrently
+            # Search multiple Indian sources concurrently
             tasks = [
-                self.search_amazon(query),
-                self.search_ebay(query),
-                self.search_generic_store(query, "BestBuy"),
-                self.search_generic_store(query, "Walmart"),
-                self.search_generic_store(query, "Target")
+                self.search_amazon_india(query),
+                self.search_flipkart(query),
+                self.search_indian_store(query, "Myntra", 6499.00),
+                self.search_indian_store(query, "Paytm Mall", 7199.00),
+                self.search_indian_store(query, "Snapdeal", 6799.00)
             ]
             
             results = await asyncio.gather(*tasks, return_exceptions=True)

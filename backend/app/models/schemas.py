@@ -12,7 +12,7 @@ class ProductInfo(BaseModel):
 
 class PriceInfo(BaseModel):
     price: float
-    currency: str = "USD"
+    currency: str = "INR"
     source: str
     url: str
     availability: str = "in_stock"
