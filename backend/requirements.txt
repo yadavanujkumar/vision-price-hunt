@@ -7,8 +7,12 @@ pydantic-settings
 # HTTP client for async web scraping
 aiohttp
 
-# Basic image processing (will install others later if needed)
+# Image processing and computer vision dependencies
 pillow
+opencv-python
+pytesseract
+scikit-learn
+numpy
 requests
 beautifulsoup4
 aiofiles
